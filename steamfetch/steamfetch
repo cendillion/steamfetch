@@ -1,0 +1,31 @@
+#!/usr/bin/env sh
+
+# command arguments/user input
+search="$*"
+search="$(printf "$search" | tr ' ' '+')"
+
+# get the first url from steam search
+url="$(curl -s "https://store.steampowered.com/search/?term=$search" | grep -v "excluded" | grep -m 1 -Eo "https://store.steampowered.com/app/[^ >]+/")"
+
+# get title from url
+title="$(printf "$url" | cut -d '/' -f 6 | tr '_' ' ')"
+title="$(command -v figlet > /dev/null && figlet -f slant -t "$title" || printf "$title")" # use figlet if installed
+
+# request game page based on url
+page="$(curl -s "$url" --cookie "birthtime=0")"
+reqs="$(echo "$page" | awk '/game_area_sys_req sysreq_content/,0')" # filter until requirements section
+
+# formatting the text
+list="awk '/clear: both;/{exit}1' | grep -o '<[^>]*>.*</[^>]*>' | sed 's/<strong>/    /g;s/<li>/\n    /g;s/<[^>]*>//g'"
+case "$reqs" in
+	*linux*) # if there is native version
+	reqsLinux="$(printf "$reqs" | awk '/data-os="linux"/,0' | eval "$list")"
+		;;
+esac
+reqs="$(printf "$reqs" | eval "$list")"
+
+# printing the results
+printf "$url\n"
+printf "\033[1m$title\033[0m\n"
+[ -n "$reqsLinux" ] && printf "NATIVE/LINUX REQUIREMENTS:\n$reqsLinux\n"
+printf "PROTON/WINDOWS REQUIREMENTS:\n$reqs\n"
