@@ -21,7 +21,7 @@ case "$reqs" in
 	reqsLinux="$(printf %s "$reqs" | awk '/data-os="linux"/,0' | eval "$list")"
 		;;
 esac
-reqs="$(printf %s "$reqs" | eval "$list")" #proton/windows version
+reqs="$(printf %s "$reqs" | eval "$list")" # proton/windows version
 
 # printing the results
 printf "$url\n"
