@@ -11,18 +11,17 @@ url="$(curl -s "https://store.steampowered.com/search/?term=$search" | grep -v "
 title="$(printf "$url" | cut -d '/' -f 6 | tr '_' ' ')"
 title="$(command -v figlet > /dev/null && figlet -f slant -t "$title" || printf "$title")" # use figlet if installed
 
-# request game page based on url
-page="$(curl -s "$url" --cookie "birthtime=0")"
-reqs="$(echo "$page" | awk '/game_area_sys_req sysreq_content/,0')" # filter until requirements section
+# request game page based on url and filter until requirements section
+reqs="$(curl -s "$url" --cookie "birthtime=0" | awk '/game_area_sys_req sysreq_content/,0')"
 
 # formatting the text
 list="awk '/clear: both;/{exit}1' | grep -o '<[^>]*>.*</[^>]*>' | sed 's/<strong>/    /g;s/<li>/\n    /g;s/<[^>]*>//g'"
 case "$reqs" in
-	*linux*) # if there is native version
-	reqsLinux="$(printf "$reqs" | awk '/data-os="linux"/,0' | eval "$list")"
+	*linux*) # if there is native/linux version
+	reqsLinux="$(printf %s "$reqs" | awk '/data-os="linux"/,0' | eval "$list")"
 		;;
 esac
-reqs="$(printf "$reqs" | eval "$list")"
+reqs="$(printf %s "$reqs" | eval "$list")" #proton/windows version
 
 # printing the results
 printf "$url\n"
