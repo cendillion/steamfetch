@@ -11,7 +11,7 @@ Usage:
     steamfetch [GAME TITLE]
 
 Example (fetch Team Fortress 2):
-    steamfetch tf2
+    steamfetch team fortress 2
 
 Dependencies:
     coreutils (GNU)
